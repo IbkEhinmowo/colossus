@@ -19,20 +19,19 @@ document
             const text = a.innerText.trim();
             const link =
               "https://www.facebook.com" + a.getAttribute("href").split("?")[0];
-            return `${text}  ${link}`;
+            return `${text}\n${link}`;
           });
         },
       });
 
       const listings = result[0].result;
-      console.log("Listings with link:", listings);
+      console.log("Listings with links:", listings);
 
-      // Optional: send to your Python server
-      // fetch("http://localhost:5000/receive", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ data: listings }),
-      // });
+      fetch("http://localhost:5001/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listings: listings }),
+      });
     } catch (error) {
       console.error("Error getting listings:", error);
     }
