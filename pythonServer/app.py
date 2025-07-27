@@ -1,8 +1,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from models.listing import IncomingListing
-from parsers.marketplace import MarketplaceParser
+from pythonServer.models.listing import IncomingListing
+from pythonServer.parsers.marketplace import MarketplaceParser
 
 app = FastAPI()
 
@@ -22,7 +22,7 @@ parser = MarketplaceParser()
 def upload(lists: IncomingListing):
     parsed = [parser.parse(html) for html in lists.listings]
     for p in parsed:
-        print(f"Title: {p.title} | Price: {p.price} | Location: {p.location} | Link: {p.link} | Just Listed: {p.is_just_listed}")
+        print(f"Title: {p.title}\nPrice: {p.price}\nLocation: {p.location}\nLink: {p.link}\nJust Listed: {p.is_just_listed}\n")
     return {"status": "received", "parsed_count": len(parsed)}
 
 
