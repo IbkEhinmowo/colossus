@@ -2,11 +2,11 @@
 
 # 🏛️ Colossus
 
-_A distributed marketplace intelligence system with Chrome extension frontend and FastAPI-powered parsing backend_
+_A distributed marketplace intelligence system with Chrome extension for data harvesting and FastAPI-powered parsing backend_
 
 ## Architecture Overview
 
-Colossus operates as a dual-layer system: a Chrome extension that harvests DOM fragments from marketplace listings, and a Python server that transforms raw HTML into structured data through intelligent parsing algorithms.
+Colossus operates as a dual-layer system: a Chrome extension that harvests DOM fragments from marketplace listings, and a Python server that transforms raw HTML into structured data through intelligent parsing algorithms and sentence transformers.
 
 ### Data Flow Pipeline
 
@@ -14,9 +14,9 @@ Colossus operates as a dual-layer system: a Chrome extension that harvests DOM f
 Chrome Extension → HTML Collection → FastAPI Server → BeautifulSoup Parser → LLM Enhancement → Structured Output
 ```
 
-**Frontend (Chrome Extension)**
+**Data Harvesting (Chrome Extension)**
 
-- Injects into marketplace pages
+- Injects into Facebook Marketplace DOM
 - Extracts listing HTML via DOM manipulation
 - Streams data to backend via CORS-enabled API calls
 
