@@ -14,3 +14,9 @@ __pycache__/
 
 # Logs
 *.log
+
+
+
+run_bot.sh
+
+get-pip.py

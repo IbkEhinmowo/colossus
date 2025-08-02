@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from pythonServer.models.listing import ParsedListing
+from models.listing import ParsedListing
 
 class MarketplaceParser:
     def parse(self, html: str) -> ParsedListing:
