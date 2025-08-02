@@ -1,68 +1,106 @@
 /** @format */
 
-document
-  .getElementById("myButton")
-  .addEventListener("click", async function () {
-    try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
+let intervalId = null;
 
-      const result = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: () => {
-          function getTagWithText(node) {
-            let results = [];
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              // If this element has only text or whitespace children, output it
-              const hasElementChild = Array.from(node.childNodes).some(
-                (n) => n.nodeType === Node.ELEMENT_NODE
-              );
-              if (!hasElementChild && node.textContent.trim()) {
-                // Remove all attributes
-                const tag = node.tagName.toLowerCase();
-                if (tag === "a") {
-                  const href = node.getAttribute("href");
-                  results.push(
-                    `<a href="${href}">${node.textContent.trim()}</a>`
-                  );
-                } else {
-                  results.push(`<${tag}>${node.textContent.trim()}</${tag}>`);
-                }
-              } else {
-                // Otherwise, recurse into children
-                node.childNodes.forEach((child) => {
-                  results = results.concat(getTagWithText(child));
-                });
-              }
-            }
-            return results;
-          }
-
-          const anchors = document.querySelectorAll(
-            'a[href*="/marketplace/item/"]'
+function getListings(tabId) {
+  return chrome.scripting.executeScript({
+    target: { tabId },
+    function: () => {
+      function getTagWithText(node) {
+        let results = [];
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const hasElementChild = Array.from(node.childNodes).some(
+            (n) => n.nodeType === Node.ELEMENT_NODE
           );
-          return Array.from(anchors).map((a) => {
-            // Always include the anchor tag with its href and no children
-            const href = a.getAttribute("href");
-            let output = [`<a href="${href}"></a>`];
-            // For each descendant, get only the tag and its text
-            output = output.concat(getTagWithText(a));
-            return output.join("");
-          });
-        },
+          if (!hasElementChild && node.textContent.trim()) {
+            const tag = node.tagName.toLowerCase();
+            if (tag === "a") {
+              const href = node.getAttribute("href");
+              results.push(`<a href="${href}">${node.textContent.trim()}</a>`);
+            } else {
+              results.push(`<${tag}>${node.textContent.trim()}</${tag}>`);
+            }
+          } else {
+            node.childNodes.forEach((child) => {
+              results = results.concat(getTagWithText(child));
+            });
+          }
+        }
+        return results;
+      }
+      const anchors = document.querySelectorAll(
+        'a[href*="/marketplace/item/"]'
+      );
+      return Array.from(anchors).map((a) => {
+        const href = a.getAttribute("href");
+        let output = [`<a href="${href}"></a>`];
+        output = output.concat(getTagWithText(a));
+        return output.join("");
       });
-
-      const listings = result[0].result;
-      console.log("Listings with divs:", listings);
-
-      fetch("http://127.0.0.1:8000/listings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listings: listings }),
-      });
-    } catch (error) {
-      console.error("Error getting listings:", error);
-    }
+    },
   });
+}
+
+async function sendListingsToBackend(listings) {
+  try {
+    await fetch("http://127.0.0.1:8000/listings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listings }),
+    });
+  } catch (error) {
+    console.error("Error sending listings:", error);
+  }
+}
+
+async function refreshAndSend() {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    // Refresh the page
+    await chrome.tabs.reload(tab.id);
+    // Wait a bit for reload to finish
+    setTimeout(async () => {
+      const result = await getListings(tab.id);
+      const listings = result[0].result;
+      await sendListingsToBackend(listings);
+    }, 2000); // 2 seconds after reload
+  } catch (error) {
+    console.error("Error in refreshAndSend:", error);
+  }
+}
+
+const startBtn = document.getElementById("startButton");
+const stopBtn = document.getElementById("stopButton");
+const intervalInput = document.getElementById("interval");
+
+function setButtonStates(running) {
+  startBtn.disabled = running;
+  stopBtn.disabled = !running;
+}
+
+setButtonStates(false); // Initial state: Start enabled, Stop disabled
+
+startBtn.addEventListener("click", () => {
+  if (intervalId) return;
+  const interval = parseInt(intervalInput.value, 10) * 1000;
+  setButtonStates(true);
+  refreshAndSend();
+  intervalId = setInterval(refreshAndSend, interval);
+});
+
+stopBtn.addEventListener("click", () => {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+    setButtonStates(false);
+  }
+});
+
+intervalInput.addEventListener("input", () => {
+  if (!intervalId) {
+    setButtonStates(false);
+  }
+});

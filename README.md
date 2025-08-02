@@ -2,51 +2,72 @@
 
 # 🏛️ Colossus
 
-_A distributed marketplace intelligence system with Chrome extension for data harvesting and FastAPI-powered parsing backend_
+_Colossus: Because why manually browse when you can automate, parse, and flex your data muscles?_
 
-## Architecture Overview
+## What Is This?
 
-Colossus operates as a dual-layer system: a Chrome extension that harvests DOM fragments from marketplace listings, and a Python server that transforms raw HTML into structured data through intelligent parsing algorithms and sentence transformers.
+Colossus is a distributed marketplace intelligence system. It’s a Chrome extension that snatches up marketplace listings, then hands them off to a Python FastAPI backend that parses, enhances, and generally makes my data look smarter than you on a Monday morning.
 
-### Data Flow Pipeline
+## How Does It Work?
+
+### The Pipeline (aka: The Data Olympics)
 
 ```
-Chrome Extension → HTML Collection → FastAPI Server → BeautifulSoup Parser → LLM Enhancement → Structured Output
+Chrome Extension → HTML Collector → FastAPI Server → BeautifulSoup Parser → LLM Wizardry → Structured Output
 ```
 
-**Data Harvesting (Chrome Extension)**
+### Chrome Extension
 
-- Injects into Facebook Marketplace DOM
-- Extracts listing HTML via DOM manipulation
-- Streams data to backend via CORS-enabled API calls
+- Injects itself into Facebook Marketplace
+- Grabs listing HTML with DOM acrobatics
+- Yeets data to the backend via API calls
 
-**Backend (Python FastAPI)**
+### Backend (Python FastAPI)
 
-- Receives HTML payloads through `/listings` POST endpoint
-- Deploys BeautifulSoup-based parsing engine
-- Extracts: title, price, location, link, listing freshness
-- Returns structured JSON with parsing metrics
+- Accepts HTML payloads at `/listings` (POST only)
+- BeautifulSoup-based parsing engine slices, dices, and extracts:
+  - Title
+  - Price
+  - Location
+  - Link
+  - Listing freshness (is it hot off the press?)
+- Returns JSON so clean you could eat off it
 
-**Intelligence Layer**
+### Intelligence Layer
 
-- Raw parsed data gets fed into LLM for semantic enhancement
-- Improves search relevance and data quality
-- Handles edge cases in marketplace formatting
+- Parsed data gets a special treatment with an LLM for semantic enhancement
+- Search relevance and data quality go from “meh” to “chef’s kiss”
+- Handles edge cases like a pro (even when Marketplace changes its mind)
 
-### Parser Logic
+### Parser Logic 
 
-The `MarketplaceParser` employs a span-based extraction strategy:
+- Detects “Just Listed” with regex wizardry (if Facebook decides to change the HTML structure, might stop working)
+- Adjusts field extraction based on listing age (because time is an illusion)
+- Converts relative URLs to absolute,
+- Gracefully degrades when Facebook gets weird
 
-- Detects "Just Listed" indicators through text pattern matching
-- Dynamically adjusts field extraction based on listing age
-- Constructs absolute URLs from relative Facebook Marketplace paths
-- Gracefully degrades when DOM structure varies
+## Tech Stack
 
-### Tech Stack
+- **Extension**: Vanilla JavaScript, Manifest V3 and some audacity
+- **Server**: FastAPI + Pydantic (type safety...)
+- **Parser**: BeautifulSoup4 
+- **Intelligence**: LLM integration for search that actually works
 
-- **Extension**: Vanilla JavaScript with Manifest V3
-- **Server**: FastAPI with Pydantic models for type safety
-- **Parser**: BeautifulSoup4 for HTML traversal
-- **Intelligence**: LLM integration for enhanced search capabilities
 
-_Built for developers who appreciate clean architecture and robust data pipelines._
+## Use Cases
+
+Colossus helps you grab and organize Facebook Marketplace data. If you use this for whatever reason, hope they don't ban you (not liable for that). Here’s what you can do:
+
+- Watch for new listings
+- Compare prices
+- Send alerts to bots or users
+- Build datasets for research
+- Cut down on manual copy-paste
+- Use with a Discord bot to organize ur data in channels and update you when necessary
+- Power a full web app for searching and viewing listings
+
+Example: Set Colossus to scan Marketplace every minute. It grabs listings and sends them to your database and Discord, or a web app.
+
+_Colossus: For devs who like their data pipelines robust, their architecture clean, and their README’s just a little bit extra._
+
+and btw its named colossus after the colossal titan in aot

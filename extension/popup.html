@@ -6,9 +6,17 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <button id="myButton">Get Page HTML</button>
-    <div id="result" style="margin-top: 10px; font-size: 12px"></div>
+    <div class="container">
+      <h3>Auto Page Refresher</h3>
+      <div class="refresh-settings">
+        <label for="interval">Refresh interval (seconds):</label>
+        <input type="number" id="interval" min="10" value="60" />
+      </div>
+      <div class="controls">
+        <button id="startButton">Start</button>
+        <button id="stopButton" disabled>Stop</button>
+      </div>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>
-
