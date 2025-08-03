@@ -6,11 +6,11 @@ _Colossus: Because why manually browse when you can automate, parse, and flex yo
 
 ## What Is This?
 
-Colossus is a distributed marketplace intelligence system. It’s a Chrome extension that snatches up marketplace listings, then hands them off to a Python FastAPI backend that parses, enhances, and generally makes my data look smarter than you on a Monday morning.
+Colossus is a distributed marketplace intelligence system. It’s a Chrome extension that snatches up marketplace listings, then hands them off to a Python FastAPI backend that parses and enhances for whatever use case.
 
 ## How Does It Work?
 
-### The Pipeline (aka: The Data Olympics)
+### The Gist
 
 ```
 Chrome Extension → HTML Collector → FastAPI Server → BeautifulSoup Parser → LLM Wizardry → Structured Output
@@ -19,7 +19,7 @@ Chrome Extension → HTML Collector → FastAPI Server → BeautifulSoup Parser 
 ### Chrome Extension
 
 - Injects itself into Facebook Marketplace
-- Grabs listing HTML with DOM acrobatics
+- Grabs listing HTML 
 - Yeets data to the backend via API calls
 
 ### Backend (Python FastAPI)
