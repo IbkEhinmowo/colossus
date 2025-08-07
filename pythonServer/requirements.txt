@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
+certifi
+discord.py
+beautifulsoup4
+sqlalchemy
+psycopg2-binary

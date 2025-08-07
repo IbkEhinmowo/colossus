@@ -1,0 +1,7 @@
+{
+  "workbench.colorCustomizations": {
+  "editor.selectionBackground": "#898787", // bright yellow highlight
+  "editor.selectionHighlightBackground": "#8c6d6d", // lighter yellow for secondary highlights
+  "editorBracketMatch.background": "#948b71" /
+  }
+}

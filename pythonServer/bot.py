@@ -20,8 +20,8 @@ load_dotenv()
 
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-reportChannelID: int = 1400330644562776064
-newlistingChannelID: int = 1400945491776241716
+reportChannelID: int = int(os.getenv("DISCORD_REPORT_CHANNEL_ID"))
+newlistingChannelID: int = int(os.getenv("DISCORD_NEW_LISTINGS_CHANNEL_ID"))
 
 # Initialize bot
 bot = discord.Bot()

@@ -3,11 +3,13 @@
   "name": "Auto Marketplace Scanner",
   "version": "1.0",
   "description": "Automatically scans marketplace listings every minute",
-  "permissions": ["contextMenus", "scripting", "activeTab", "tabs", "alarms"],
+  "permissions": ["scripting", "activeTab", "tabs", "alarms", "storage"],
+  "host_permissions": ["*://*.facebook.com/*", "http://127.0.0.1:8000/*"],
   "action": {
     "default_popup": "popup.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   }
 }
