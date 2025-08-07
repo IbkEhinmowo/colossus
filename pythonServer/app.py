@@ -22,8 +22,8 @@ parser = MarketplaceParser()
 @app.post("/listings")
 def upload(lists: IncomingListing):
     parsed = [parser.parse(html) for html in lists.listings]
+    success_count = 0
     for item in parsed:
-        # print(f"Processing: Title: {item.title}\nPrice: {item.price}\nLocation: {item.location}\nLink: {item.link}\nJust Listed: {item.is_just_listed}\n")
         try:
             with engine.connect() as conn:
                 trans = conn.begin()
@@ -37,7 +37,8 @@ def upload(lists: IncomingListing):
                 conn.execute(DATABASE_INSERT)
                 trans.commit()
                 print(f"Inserted listing into database: {item.title}")
-                parsed_listings_queue.append(item)  # Only add to queue if DB insert succeeds
+                parsed_listings_queue.append(item)
+                success_count += 1
         except Exception as e:
             print(f"Error inserting into database: {str(e)}")
-    return {"status": "received", "parsed_count": len(parsed)}
+    return {"status": "received", "parsed_count": len(parsed), "inserted_count": success_count}
