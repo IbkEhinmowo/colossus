@@ -20,7 +20,5 @@ __pycache__/
 run_bot.sh
 
 get-pip.py
-
-# Chrome extension scripts to ignore
 extension/background.js
 extension/popup.js

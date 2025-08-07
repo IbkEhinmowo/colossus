@@ -1,64 +1,23 @@
 /** @format */
 
-// Background service worker initialized
-console.log("Background service worker started");
-// Handle start/stop messages by creating or clearing alarms
+let intervalId = null;
+let refreshInterval = 60000; // default 60s
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Received message:", message);
   if (message.type === "START_REFRESH") {
-    const intervalSec = message.interval || 60;
-    // Save interval for scheduling
-    chrome.storage.local.set({ refreshIntervalSec: intervalSec });
-    // Immediate refresh
+    if (intervalId) return;
+    refreshInterval = message.interval || 60000;
     runRefreshAndSend();
-    // Schedule next alarm at intervalSec seconds
-    chrome.alarms.create("refreshMarketplace", {
-      when: Date.now() + intervalSec * 1000,
-    });
+    intervalId = setInterval(runRefreshAndSend, refreshInterval);
     sendResponse({ status: "started" });
-  } else if (message.type === "STOP_REFRESH") {
-    chrome.alarms.clear("refreshMarketplace", (wasCleared) => {
-      sendResponse({ status: wasCleared ? "stopped" : "none" });
-    });
-    return true; // will respond asynchronously
-    return true; // will respond asynchronously
-  } else if (message.type === "GET_STATUS") {
-    // Check if an alarm exists
-    chrome.alarms.get("refreshMarketplace", (alarm) => {
-      sendResponse({ running: !!alarm });
-    });
-    return true; // will respond asynchronously
-  }
-  // For async sendResponse in STOP_REFRESH and GET_STATUS, return true is implicit after those cases
-});
-// Message handler for start, stop, and status
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "START_REFRESH") {
-    const intervalSec = message.interval || 60;
-    // Clear existing alarms, run immediate, and schedule periodic alarm
-    chrome.alarms.clear("refreshMarketplace", () => {
-      runRefreshAndSend();
-      const periodMin = intervalSec / 60;
-      chrome.alarms.create("refreshMarketplace", {
-        periodInMinutes: periodMin,
-      });
-      sendResponse({ status: "started" });
-    });
-    return true; // will respond asynchronously
   }
   if (message.type === "STOP_REFRESH") {
-    chrome.alarms.clear("refreshMarketplace", (wasCleared) => {
-      sendResponse({ status: wasCleared ? "stopped" : "none" });
-    });
-    return true; // will respond asynchronously
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+      sendResponse({ status: "stopped" });
+    }
   }
-  if (message.type === "GET_STATUS") {
-    chrome.alarms.get("refreshMarketplace", (alarm) => {
-      sendResponse({ running: !!alarm });
-    });
-    return true; // will respond asynchronously
-  }
-  return false;
 });
 
 function runRefreshAndSend() {
@@ -82,26 +41,6 @@ function runRefreshAndSend() {
     });
   });
 }
-// Trigger refresh when alarm fires
-// Handle alarm trigger and schedule next one
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "refreshMarketplace") {
-    runRefreshAndSend();
-    // Reschedule next alarm based on saved interval
-    chrome.storage.local.get("refreshIntervalSec", (data) => {
-      const interval = data.refreshIntervalSec || 60;
-      chrome.alarms.create("refreshMarketplace", {
-        when: Date.now() + interval * 1000,
-      });
-    });
-  }
-});
-// Trigger refresh on periodic alarm
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "refreshMarketplace") {
-    runRefreshAndSend();
-  }
-});
 
 function getListingsScript() {
   function getTagWithText(node) {
