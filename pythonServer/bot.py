@@ -1,31 +1,23 @@
 import os
-import discord
-import ssl
-import certifi
 import asyncio
-from dotenv import load_dotenv
-from parsers.marketplace import MarketplaceParser
-from models.listing import IncomingListing
-from app import app, parsed_listings_queue
 import uvicorn
+import discord
+from dotenv import load_dotenv
+from discord.ext import commands
+from parsers.marketplace import MarketplaceParser
+from app import app, parsed_listings_queue
 
-# SSL fixes for macOS
-os.environ['SSL_CERT_FILE'] = certifi.where()
-os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
-os.environ['CURL_CA_BUNDLE'] = certifi.where()
-# Override SSL context globally
-ssl._create_default_https_context = ssl._create_unverified_context
 load_dotenv()
-
-
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 reportChannelID: int = int(os.getenv("DISCORD_REPORT_CHANNEL_ID"))
 newlistingChannelID: int = int(os.getenv("DISCORD_NEW_LISTINGS_CHANNEL_ID"))
 
-# Initialize bot
-bot = discord.Bot()
-parser= MarketplaceParser()
+# Initialize bot (discord.py)
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
+parser = MarketplaceParser()
 
 @bot.event
 async def on_ready():
@@ -33,15 +25,13 @@ async def on_ready():
     channel = bot.get_channel(reportChannelID)
     if channel:
         await channel.send("Fatoom is ready to work")
-        # Start FastAPI server in the background
-        config = uvicorn.Config(app, host="127.0.0.1", port=8000)
+        config = uvicorn.Config(app, host="0.0.0.0", port=8000)
         server = uvicorn.Server(config)
-        bot.loop.create_task(server.serve())
-        bot.loop.create_task(check_marketplace_queue())
-        
+        asyncio.create_task(server.serve())
+        asyncio.create_task(check_marketplace_queue())
     else:
         print(f"Could not find channel with ID {reportChannelID}")
-        
+
 async def check_marketplace_queue():
     """This function will run forever in the background"""
     while True:  # This makes it run forever
@@ -75,10 +65,6 @@ async def check_marketplace_queue():
 @bot.command()
 async def hello(ctx):
     await ctx.send("Hiii! I'm Natasha")
-    
-    
-
-    
  
 if __name__ == "__main__":
     bot.run(BOT_TOKEN)
