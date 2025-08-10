@@ -40,11 +40,11 @@ async def check_marketplace_queue():
             print(f"Found {len(parsed_listings_queue)} listings!")
             # Do something with the listings here
             #Process each listing
-            for listing in parsed_listings_queue[1:]:
+            for listing in parsed_listings_queue:
                 channel = bot.get_channel(newlistingChannelID)
                 if channel:
                     embed = discord.Embed(
-                        title="🏠 New Listing Alert!",
+                        title=f"🏠 New find: {listing.title}",
                         color=0x00ff00,
                         url=listing.link
                     )
@@ -60,7 +60,7 @@ async def check_marketplace_queue():
             print("No new listings")
         
         # Wait 15 seconds before checking again
-        await asyncio.sleep(10)
+        await asyncio.sleep(25)
             
 @bot.command()
 async def hello(ctx):
