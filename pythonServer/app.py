@@ -10,9 +10,7 @@ app = FastAPI()
 parsed_listings_queue = []
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "chrome-extension://jlhkcmiblgookadimdmdbihbkbgeokbi"
-    ],
+    allow_origins=["*"],  # Allow all origins for testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

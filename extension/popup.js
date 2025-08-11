@@ -43,7 +43,7 @@ function getListings(tabId) {
 
 async function sendListingsToBackend(listings) {
   try {
-    await fetch("http://127.0.0.1:8000/listings", {
+    await fetch("http://3.138.111.254:8000/listings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ listings }),
