@@ -19,19 +19,21 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 parser = MarketplaceParser()
 
+async def start_uvicorn():
+    config = uvicorn.Config(app, host="0.0.0.0", port=8000, log_level="info")
+    server = uvicorn.Server(config)
+    await server.serve()
+
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
     channel = bot.get_channel(reportChannelID)
     if channel:
         await channel.send("Fatoom is ready to work")
-        config = uvicorn.Config(app, host="0.0.0.0", port=8000)
-        server = uvicorn.Server(config)
-        asyncio.create_task(server.serve())
+        asyncio.create_task(start_uvicorn())
         asyncio.create_task(check_marketplace_queue())
     else:
         print(f"Could not find channel with ID {reportChannelID}")
-
 async def check_marketplace_queue():
     """This function will run forever in the background"""
     while True:  # This makes it run forever
