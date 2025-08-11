@@ -45,4 +45,4 @@ jobs:
           ssh -o StrictHostKeyChecking=yes ec2-user@3.138.111.254 "\
             sudo docker pull ghcr.io/ibkehinmowo/colossus-bot:latest && \
             sudo docker rm -f colossus-bot || true && \
-            sudo docker run -it --name colossus-bot --env-file /home/ec2-user/.env ghcr.io/ibkehinmowo/colossus-bot:latest"
+            sudo docker run --name colossus-bot --env-file /home/ec2-user/.env ghcr.io/ibkehinmowo/colossus-bot:latest"
