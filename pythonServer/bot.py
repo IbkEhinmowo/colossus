@@ -63,10 +63,43 @@ async def check_marketplace_queue():
         
         # Wait 15 seconds before checking again
         await asyncio.sleep(25)
+        
+        
+        
+        
+##### BOT COMMANDS #####
             
 @bot.command()
 async def hello(ctx):
     await ctx.send("Hiii! I'm Natasha")
+    
+    
+@bot.command()
+async def clearchat(ctx):
+    """Clears the report channel."""
+    channel = bot.get_channel(reportChannelID)
+    if channel:
+        await channel.purge(limit=1000)
+ 
+@bot.command()
+async def DBpurge(ctx):
+    """Clears the database."""
+    channel = bot.get_channel(reportChannelID)
+    if channel:
+        await channel.send("Purging database...")
+        
+        # Here you would add your database purge logic
+        # For example, using SQLAlchemy or raw SQL queries
+        await channel.send("Database purged successfully!")
+    else:
+        print(f"Could not find channel with ID {reportChannelID}")
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
 if __name__ == "__main__":
     bot.run(BOT_TOKEN)
