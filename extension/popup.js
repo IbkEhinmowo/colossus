@@ -1,6 +1,12 @@
 /** @format */
 
 let intervalId = null;
+let running = false;
+
+function getRandomInterval(base) {
+  const variance = 6000; // ±6 seconds in ms
+  return base + (Math.random() * 2 - 1) * variance;
+}
 
 function getListings(tabId) {
   return chrome.scripting.executeScript({
@@ -61,12 +67,12 @@ async function refreshAndSend() {
     });
     // Refresh the page
     await chrome.tabs.reload(tab.id);
-    // Wait a bit for reload to finish
+    // Wait 2 seconds for reload to finish
     setTimeout(async () => {
       const result = await getListings(tab.id);
       const listings = result[0].result;
       await sendListingsToBackend(listings);
-    }, 2000); // 2 seconds after reload
+    }, 2000);
   } catch (error) {
     console.error("Error in refreshAndSend:", error);
   }
@@ -76,31 +82,44 @@ const startBtn = document.getElementById("startButton");
 const stopBtn = document.getElementById("stopButton");
 const intervalInput = document.getElementById("interval");
 
-function setButtonStates(running) {
-  startBtn.disabled = running;
-  stopBtn.disabled = !running;
+function setButtonStates(runningState) {
+  startBtn.disabled = runningState;
+  stopBtn.disabled = !runningState;
 }
 
-setButtonStates(false); // Initial state: Start enabled, Stop disabled
+setButtonStates(false); // Initial state: start enabled, stop disabled
 
-startBtn.addEventListener("click", () => {
-  if (intervalId) return;
-  const interval = parseInt(intervalInput.value, 10) * 1000;
+async function startRefreshing() {
+  const baseInterval = parseInt(intervalInput.value, 10) * 1000;
+  if (running) return;
+
+  running = true;
   setButtonStates(true);
-  refreshAndSend();
-  intervalId = setInterval(refreshAndSend, interval);
-});
+
+  async function loop() {
+    if (!running) return;
+    await refreshAndSend();
+    if (!running) return;
+    const nextInterval = getRandomInterval(baseInterval);
+    intervalId = setTimeout(loop, nextInterval);
+  }
+
+  loop();
+}
+
+startBtn.addEventListener("click", startRefreshing);
 
 stopBtn.addEventListener("click", () => {
+  running = false;
   if (intervalId) {
-    clearInterval(intervalId);
+    clearTimeout(intervalId);
     intervalId = null;
-    setButtonStates(false);
   }
+  setButtonStates(false);
 });
 
 intervalInput.addEventListener("input", () => {
-  if (!intervalId) {
+  if (!running) {
     setButtonStates(false);
   }
 });
