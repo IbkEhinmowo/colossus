@@ -46,15 +46,17 @@ async def check_marketplace_queue():
                 channel = bot.get_channel(newlistingChannelID)
                 if channel:
                     embed = discord.Embed(
-                        title=f"🏠 New find: {listing.title}",
-                        color=0x00ff00,
+                        title=f"🏠 New{listing.title}:{listing.price}",
+                        color=0x6A5ACD,
                         url=listing.link
                     )
                     embed.add_field(name="📝 Title", value=listing.title, inline=False)
                     embed.add_field(name="💰 Price", value=listing.price, inline=True)
                     embed.add_field(name="📍 Location", value=listing.location, inline=True)
 
-                    await channel.send(embed=embed)           
+                    await channel.send(embed=embed)
+                    # Small delay between notifications
+                    await asyncio.sleep(2)           
             # Clear the queue
             parsed_listings_queue.clear()
             
