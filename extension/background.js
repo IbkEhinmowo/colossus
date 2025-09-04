@@ -1,6 +1,7 @@
 /** @format */
 
 let intervalId = null;
+
 let refreshInterval = 60000; // default 60s
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
