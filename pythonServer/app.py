@@ -31,9 +31,8 @@ def upload(lists: IncomingListing):
                 if result:
                     print(f"Duplicate listing skipped: {item.title}")
                     continue
-                trans = conn.begin()
-                # if item.is_just_listed == False:
-                #     continue  # Skip non-just-listed items
+                if not item.is_just_listed :
+                    continue  # Skip non-just-listed items
                 DATABASE_INSERT = listings.insert().values(
                     title=item.title,
                     price=item.price,
@@ -42,7 +41,7 @@ def upload(lists: IncomingListing):
                     is_just_listed=item.is_just_listed
                 )
                 conn.execute(DATABASE_INSERT)
-                trans.commit()
+                conn.commit()
                 print(f"Inserted listing into database: {item.title}")
                 parsed_listings_queue.append(item)
                 success_count += 1
