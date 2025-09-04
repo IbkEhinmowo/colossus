@@ -32,8 +32,8 @@ def upload(lists: IncomingListing):
                     print(f"Duplicate listing skipped: {item.title}")
                     continue
                 trans = conn.begin()
-                if item.price.strip().upper() == "FREE":
-                    continue  # Skip free listings
+                if item.is_just_listed == False:
+                    continue  # Skip non-just-listed items
                 DATABASE_INSERT = listings.insert().values(
                     title=item.title,
                     price=item.price,
