@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from models.listing import IncomingListing
 from parsers.marketplace import MarketplaceParser
 from database import engine, listings
+from models.llm_sort import get_llm_response
 import datetime
 
 app = FastAPI()
@@ -21,18 +22,27 @@ parser = MarketplaceParser()
 @app.post("/listings")
 def upload(lists: IncomingListing):
     parsed = [parser.parse(html) for html in lists.listings]
-    success_count = 0
+    queued_count = 0
     for item in parsed:
         try:
             with engine.connect() as conn:
-                # Check for duplicate by link before inserting
-                check_query = listings.select().where(listings.c.link == item.link)
+                # First, check if the listing already exists in the database.
+                check_query = listings.select().where(
+                    listings.c.title == item.title,
+                    listings.c.price == item.price,
+                    listings.c.link == item.link
+                )
                 result = conn.execute(check_query).fetchone()
+
+                # If it exists, we've already processed it. Skip.
                 if result:
-                    print(f"Duplicate listing skipped: {item.title}")
                     continue
-                if not item.is_just_listed :
-                    continue  # Skip non-just-listed items
+
+                # If it's a new listing, insert it into the database first.
+                # This prevents re-running the LLM on subsequent runs.
+                if not item.is_just_listed:
+                    continue  # Optional: still skip if not a fresh listing
+
                 DATABASE_INSERT = listings.insert().values(
                     title=item.title,
                     price=item.price,
@@ -42,12 +52,18 @@ def upload(lists: IncomingListing):
                 )
                 conn.execute(DATABASE_INSERT)
                 conn.commit()
-                print(f"Inserted listing into database: {item.title}")
-                parsed_listings_queue.append(item)
-                success_count += 1
+
+                # Now, for this new item, check if it's relevant for a notification.
+                if get_llm_response(f"Is the following listing a tech item? '{item.title}'"):
+                    print(f"Listing accepted by LLM: {item.title} at {item.price}")
+                    parsed_listings_queue.append(item)
+                    queued_count += 1
+                else:
+                    print(f"Listing filtered out by LLM: {item.title} at {item.price}")
+
         except Exception as e:
-            print(f"Error inserting into database: {str(e)}")
-    return {"status": "received", "parsed_count": len(parsed), "inserted_count": success_count}
+            print(f"Error processing listing: {str(e)}")
+    return {"status": "received", "parsed_count": len(parsed), "queued_for_discord": queued_count}
 
 
 

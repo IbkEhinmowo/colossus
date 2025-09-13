@@ -6,3 +6,4 @@ discord.py
 beautifulsoup4
 sqlalchemy
 psycopg2-binary
+openai
